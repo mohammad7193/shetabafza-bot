@@ -1,6 +1,5 @@
 from google import genai
 import requests
-import urllib.parse
 
 # ================= تنظیمات =================
 GEMINI_API_KEY = "AQ.Ab8RN6I6fF8z24IDPkHI2jPf4Ef9QQUOUp0Yv0ShNerVIF19XA"
@@ -9,20 +8,21 @@ CHANNEL_ID = "@shetabafza"
 # ============================================
 
 def generate_content():
-    # اتصال با ساختار جدید کتابخانه گوگل
     client = genai.Client(api_key=GEMINI_API_KEY)
     
     prompt = """
-    تو یک متخصص تولید محتوا برای آژانس دیجیتال مارکتینگ 'شتاب‌افزا' هستی.
-    یک خروجی دقیقاً با فرمت زیر بده:
-    متن: [یک کپشن حرفه‌ای، جذاب و مرتبط با ترفندهای دیجیتال مارکتینگ. از هیچ نماد ستاره یا هشتگ‌های غیرمتعارف استفاده نکن.]
-    تصویر: [یک پرامپت دقیق و حرفه‌ای به زبان انگلیسی برای ساخت عکسی مرتبط. 
-    دقت کن: حتماً باید عین متن فارسی تولید شده برای کپشن را بدون هیچگونه خلاصه‌سازی یا حذف، داخل این پرامپت انگلیسی قرار دهی تا مستقیماً روی عکس رندر شود. 
-    به هیچ عنوان از پرچم کشورها (مانند پرچم اسرائیل) یا نمادهای سیاسی نامربوط در پرامپت تصویر استفاده نکن.]
+    تو یک متخصص ارشد تولید محتوا برای آژانس دیجیتال مارکتینگ 'شتاب‌افزا' هستی. 
+    وظیفه تو نوشتن یک پست تلگرامی بسیار حرفه‌ای و جذاب است. 
+    خروجی باید دقیقاً با فرمت زیر باشد:
+
+    متن: [یک کپشن تلگرامی با استانداردهای بالا. شامل پاراگراف‌های کوتاه (حداکثر ۲ الی ۳ خط) تا چشم مخاطب خسته نشود. از ایموجی‌های مرتبط و به اندازه استفاده کن. 
+    نکته بسیار مهم: برای بولد کردن کلمات کلیدی فقط و فقط از تگ <b>کلمه</b> استفاده کن و به هیچ وجه از ستاره (*) استفاده نکن.]
+    
+    تصویر: [یک پرامپت دقیق، حرفه‌ای و پرجزئیات به زبان انگلیسی برای ساخت عکس با کیفیت بالا و مرتبط با موضوع کپشن. 
+    دقت کن: حتماً باید عین متن فارسی تولید شده برای تیتر کپشن را بدون هیچگونه خلاصه‌سازی یا حذف، داخل این پرامپت انگلیسی قرار دهی تا مستقیماً روی عکس رندر شود. به هیچ عنوان از پرچم کشورها (مانند پرچم اسرائیل) یا نمادهای سیاسی نامربوط در پرامپت تصویر استفاده نکن.]
     """
     
     try:
-        # استفاده از مدل 3.6 بر اساس درخواست صریح API گوگل
         response = client.models.generate_content(
             model='gemini-3.6-flash', 
             contents=prompt
@@ -36,30 +36,52 @@ def generate_content():
         final_caption = f"{caption_part}\n\n🆔 {CHANNEL_ID}"
         return final_caption, image_prompt_part
     except Exception as e:
-        print("❌ خطا در اتصال به جمینای:", e)
+        print("❌ خطا در تولید متن توسط جمینای:", e)
         return None, None
 
-def send_post_to_telegram(caption, image_prompt):
-    encoded_prompt = urllib.parse.quote(image_prompt)
-    image_url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width=1080&height=1080&nologo=true"
+def generate_image_and_send(caption, image_prompt):
+    client = genai.Client(api_key=GEMINI_API_KEY)
     
-    telegram_api_url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendPhoto"
-    payload = {
-        "chat_id": CHANNEL_ID,
-        "photo": image_url,
-        "caption": caption
-    }
-    
-    response = requests.post(telegram_api_url, data=payload)
-    if response.status_code == 200:
-        print("✅ پست با موفقیت منتشر شد!")
-    else:
-        print("❌ خطا در ارسال به تلگرام:", response.text)
+    try:
+        print("در حال ساخت تصویر اختصاصی با گوگل Imagen 3...")
+        # ساخت تصویر با موتور Imagen 3 گوگل
+        result = client.models.generate_images(
+            model='imagen-3.0-generate-001',
+            prompt=image_prompt,
+            config=dict(
+                number_of_images=1,
+                aspect_ratio="1:1",
+                output_mime_type="image/jpeg",
+            )
+        )
+        
+        # استخراج فایل تصویر تولید شده
+        image_bytes = result.generated_images[0].image.image_bytes
+        
+        print("در حال ارسال پست کامل به تلگرام...")
+        telegram_api_url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendPhoto"
+        
+        # ارسال مستقیم فایل تصویر همراه با کپشن به سرور تلگرام
+        files = {'photo': ('shetabafza.jpg', image_bytes, 'image/jpeg')}
+        data = {
+            "chat_id": CHANNEL_ID,
+            "caption": caption,
+            "parse_mode": "HTML"
+        }
+        
+        response = requests.post(telegram_api_url, data=data, files=files)
+        if response.status_code == 200:
+            print("✅ پست با موفقیت و کیفیت بالا در کانال منتشر شد!")
+        else:
+            print("❌ خطا در ارسال به تلگرام:", response.text)
+            
+    except Exception as e:
+        print("❌ خطا در بخش ساخت تصویر یا ارتباط با تلگرام:", e)
 
 if __name__ == "__main__":
-    print("در حال اجرای ربات و تولید محتوا...")
+    print("شروع پروسه تولید محتوای شتاب‌افزا...")
     final_caption, img_prompt = generate_content()
     if final_caption and img_prompt:
-        send_post_to_telegram(final_caption, img_prompt)
+        generate_image_and_send(final_caption, img_prompt)
     else:
-        print("❌ محتوایی برای ارسال ساخته نشد.")
+        print("❌ محتوایی برای ارسال آماده نشد.")
