@@ -12,7 +12,7 @@ PEXELS_API_KEY = "ETWbUEAkpzHrKYgZ068n9byjx2qBF6u8S5bFiyY9oCxElaivhqpFCygP"
 TELEGRAM_BOT_TOKEN = "8945684990:AAEem4Fuoe0t8I3hBHNy1jwx35lme2aQpSU"
 TELEGRAM_CHANNEL_ID = "@shetabafza"
 
-# بله (تغییر به آیدی عمومی کانال)
+# بله (استفاده از آیدی عمومی مطابق مستندات)
 BALE_BOT_TOKEN = "1384853358:6_bxC3Qwe3V07cWJytRgY9WdgscJ8vW4XQE"
 BALE_CHANNEL_ID = "@shetabafza_ir" 
 
@@ -69,7 +69,12 @@ def send_to_bale(caption, image_url):
     print("در حال ارسال به بله...")
     url = f"https://tapi.bale.ai/bot{BALE_BOT_TOKEN}/sendPhoto"
     payload = {"chat_id": BALE_CHANNEL_ID, "photo": image_url, "caption": caption + f"\n\n🆔 {BALE_CHANNEL_ID}"}
-    requests.post(url, data=payload)
+    
+    response = requests.post(url, data=payload)
+    if response.status_code == 200:
+        print("✅ پست بله با موفقیت منتشر شد.")
+    else:
+        print(f"❌ خطا در بله: {response.text}")
 
 def send_to_instagram(caption, image_path):
     print("در حال اتصال به اینستاگرام...")
