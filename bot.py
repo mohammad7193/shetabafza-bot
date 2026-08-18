@@ -22,9 +22,9 @@ def generate_content():
     """
     
     try:
-        # استفاده از مدل پایدار و سریع flash در API
+        # استفاده از مدل 3.6 بر اساس درخواست صریح API گوگل
         response = client.models.generate_content(
-            model='gemini-2.0-flash', 
+            model='gemini-3.6-flash', 
             contents=prompt
         )
         text_output = response.text
