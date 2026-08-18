@@ -1,6 +1,7 @@
 from google import genai
 import requests
 import random
+import urllib.parse
 
 # ================= تنظیمات =================
 GEMINI_API_KEY = "AQ.Ab8RN6I6fF8z24IDPkHI2jPf4Ef9QQUOUp0Yv0ShNerVIF19XA"
@@ -37,8 +38,7 @@ def generate_post_content():
         return None, None
 
 def send_to_telegram(caption, image_topic):
-    # انتخاب تصویر واقعی از Unsplash بر اساس موضوع
-    # از یک عدد تصادفی استفاده می‌کنیم تا هر بار تصویر متفاوتی برای یک موضوع خاص نمایش داده شود
+    # انتخاب تصویر واقعی از Unsplash بر اساس موضوع به همراه پارامتر تصادفی
     random_id = random.randint(1, 100)
     image_url = f"https://source.unsplash.com/featured/?{urllib.parse.quote(image_topic)}&sig={random_id}"
     
