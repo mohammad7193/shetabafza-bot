@@ -4,7 +4,7 @@ import random
 import os
 from instagrapi import Client
 
-# ================= تنظیمات (تکمیل شده) =================
+# ================= تنظیمات =================
 GEMINI_API_KEY = "AQ.Ab8RN6I6fF8z24IDPkHI2jPf4Ef9QQUOUp0Yv0ShNerVIF19XA"
 PEXELS_API_KEY = "ETWbUEAkpzHrKYgZ068n9byjx2qBF6u8S5bFiyY9oCxElaivhqpFCygP"
 
@@ -12,14 +12,14 @@ PEXELS_API_KEY = "ETWbUEAkpzHrKYgZ068n9byjx2qBF6u8S5bFiyY9oCxElaivhqpFCygP"
 TELEGRAM_BOT_TOKEN = "8945684990:AAEem4Fuoe0t8I3hBHNy1jwx35lme2aQpSU"
 TELEGRAM_CHANNEL_ID = "@shetabafza"
 
-# بله
+# بله (تغییر به آیدی عمومی کانال)
 BALE_BOT_TOKEN = "1384853358:6_bxC3Qwe3V07cWJytRgY9WdgscJ8vW4XQE"
-BALE_CHANNEL_ID = "@shetabafza" # اگر آیدی کانال بله متفاوت است، این را تغییر دهید
+BALE_CHANNEL_ID = "@shetabafza_ir" 
 
 # اینستاگرام
 IG_USERNAME = "shetabafza_ir"
 IG_PASSWORD = "9EXiJVTP"
-# =========================================================
+# ============================================
 
 def generate_post_content():
     client = genai.Client(api_key=GEMINI_API_KEY)
@@ -54,7 +54,6 @@ def get_pexels_image(image_topic):
     return "https://images.pexels.com/photos/3184418/pexels-photo-3184418.jpeg"
 
 def download_image_locally(image_url, file_name="post_image.jpg"):
-    # دانلود تصویر برای ارسال به اینستاگرام
     response = requests.get(image_url)
     with open(file_name, 'wb') as file:
         file.write(response.content)
@@ -68,7 +67,6 @@ def send_to_telegram(caption, image_url):
 
 def send_to_bale(caption, image_url):
     print("در حال ارسال به بله...")
-    # آدرس API بله دقیقاً مشابه تلگرام است اما روی سرورهای بله (tapi.bale.ai)
     url = f"https://tapi.bale.ai/bot{BALE_BOT_TOKEN}/sendPhoto"
     payload = {"chat_id": BALE_CHANNEL_ID, "photo": image_url, "caption": caption + f"\n\n🆔 {BALE_CHANNEL_ID}"}
     requests.post(url, data=payload)
@@ -78,14 +76,8 @@ def send_to_instagram(caption, image_path):
     try:
         cl = Client()
         cl.login(IG_USERNAME, IG_PASSWORD)
-        
-        # حالت اول: انتشار به عنوان پست (Feed) - پیشنهاد من برای محتوای طولانی
         cl.photo_upload(image_path, caption)
         print("✅ پست اینستاگرام با موفقیت منتشر شد.")
-        
-        # حالت دوم: اگر اصرار به استوری کردن دارید، خط بالا را پاک کنید و خط پایین را از حالت کامنت درآورید:
-        # cl.photo_upload_to_story(image_path, caption="محتوای جدید منتشر شد!")
-        
     except Exception as e:
         print("❌ خطا در ارسال به اینستاگرام:", e)
 
@@ -93,16 +85,15 @@ if __name__ == "__main__":
     print("شروع پروسه ربات چندپلتفرمی شتاب‌افزا...")
     
     base_caption, topic = generate_post_content()
+    
     if base_caption and topic:
         image_url = get_pexels_image(topic)
         local_image_path = download_image_locally(image_url)
         
-        # انتشار در 3 پلتفرم هدف
         send_to_telegram(base_caption, image_url)
         send_to_bale(base_caption, image_url)
         send_to_instagram(base_caption, local_image_path)
         
-        # پاک کردن فایل عکس دانلود شده پس از انتشار
         if os.path.exists(local_image_path):
             os.remove(local_image_path)
             
