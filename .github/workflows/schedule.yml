@@ -1,27 +1,12 @@
-name: Telegram Auto Post
+# کدهای قبلی شما اینجاست...
+    - name: Run bot script
+      run: python bot.py
 
-on:
-  schedule:
-    # این زمان بر اساس UTC است. 07:00 یعنی حدود ساعت 10:30 صبح به وقت ایران
-    - cron: '0 7 * * *'
-  workflow_dispatch: # این خط به ما اجازه می‌دهد دستی هم کد را تست کنیم
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
-
-      - name: Install dependencies
-        run: |
-          pip install -r requirements.txt
-
-      - name: Run Telegram Bot
-        run: python bot.py
+    # این بخش جدید را به انتهای فایل اضافه کنید:
+    - name: Save History File to Repository
+      run: |
+        git config --global user.name 'github-actions[bot]'
+        git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+        git add history.txt
+        git commit -m "Update post history to avoid duplicates" || echo "No changes to commit"
+        git push
