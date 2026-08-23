@@ -7,23 +7,27 @@ from instagrapi import Client
 # ================= تنظیمات =================
 GEMINI_API_KEY = "AQ.Ab8RN6I6fF8z24IDPkHI2jPf4Ef9QQUOUp0Yv0ShNerVIF19XA"
 PEXELS_API_KEY = "ETWbUEAkpzHrKYgZ068n9byjx2qBF6u8S5bFiyY9oCxElaivhqpFCygP"
+
+# تلگرام
 TELEGRAM_BOT_TOKEN = "8945684990:AAEem4Fuoe0t8I3hBHNy1jwx35lme2aQpSU"
 TELEGRAM_CHANNEL_ID = "@shetabafza"
+
+# بله
 BALE_BOT_TOKEN = "1384853358:6_bxC3Qwe3V07cWJytRgY9WdgscJ8vW4XQE"
 BALE_CHANNEL_ID = "@shetabafza_ir" 
+
+# اینستاگرام
 IG_USERNAME = "shetabafza_ir"
 IG_PASSWORD = "9EXiJVTP"
 # ============================================
 
 def get_history():
-    # خواندن موضوعات قبلی از فایل تاریخچه
     if os.path.exists("history.txt"):
         with open("history.txt", "r", encoding="utf-8") as file:
             return file.read().strip()
     return "تاریخچه‌ای وجود ندارد. این اولین پست است."
 
 def save_to_history(topic):
-    # ذخیره موضوع جدید در فایل تاریخچه
     with open("history.txt", "a", encoding="utf-8") as file:
         file.write(f"- {topic}\n")
 
@@ -40,17 +44,16 @@ def generate_post_content():
     لطفاً یک پست جدید بنویس. 
     قانون طلایی: به شدت از کلی‌گویی (مثل "محتوا پادشاه است" یا "سئو مهم است") پرهیز کن! به جای آن، وارد جزئیات شو و یک "تکنیک خرد و بسیار عملی" (مثلاً یک ابزار خاص، یک ترفند در قیمت‌گذاری، یا یک روش دقیق برای افزایش نرخ کلیک) را آموزش بده تا مخاطب احساس کند یک چیز جدید و تخصصی یاد گرفته است.
     
-    خروجی باید دقیقاً با این فرمت سه بخشی باشد:
-    متن: [یک کپشن جذاب و تخصصی، با پاراگراف‌های کوتاه، همراه با ایموجی. بدون تگ HTML. بین ۷۰ تا ۱۰۰ کلمه]
+    خروجی باید دقیقاً با این فرمت سه بخشی باشد (بدون کلمات اضافه):
+    متن: [یک کپشن جذاب و تخصصی، با پاراگراف‌های کوتاه، همراه با ایموجی. بدون تگ HTML و ستاره. بین ۷۰ تا ۱۰۰ کلمه]
     موضوع_تصویر: [یک عبارت کوتاه انگلیسی برای جستجوی عکس مرتبط]
-    موضوع_تاریخچه: [یک عبارت فارسی ۳ تا ۴ کلمه‌ای که مشخص کند امروز درباره چه تکنیک جزئی‌ای حرف زدی (تا من آن را در تاریخچه ذخیره کنم تا فردا تکرار نکنی)]
+    موضوع_تاریخچه: [یک عبارت فارسی ۳ تا ۴ کلمه‌ای که مشخص کند امروز درباره چه تکنیک جزئی‌ای حرف زدی]
     """
     
     try:
         response = client.models.generate_content(model='gemini-3.6-flash', contents=prompt)
         text_output = response.text
         
-        # جداسازی بخش‌های مختلف خروجی
         caption_part = text_output.split("متن:")[1].split("موضوع_تصویر:")[0].strip()
         image_topic = text_output.split("موضوع_تصویر:")[1].split("موضوع_تاریخچه:")[0].strip()
         history_topic = text_output.split("موضوع_تاریخچه:")[1].strip()
@@ -105,7 +108,6 @@ if __name__ == "__main__":
     base_caption, topic, history_topic = generate_post_content()
     
     if base_caption and topic and history_topic:
-        # ذخیره در تاریخچه
         save_to_history(history_topic)
         print(f"✅ موضوع '{history_topic}' در تاریخچه ذخیره شد.")
         
