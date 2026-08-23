@@ -1,12 +1,36 @@
-# کدهای قبلی شما اینجاست...
-    - name: Run bot script
-      run: python bot.py
+name: Auto Post Bot with History
 
-    # این بخش جدید را به انتهای فایل اضافه کنید:
-    - name: Save History File to Repository
-      run: |
-        git config --global user.name 'github-actions[bot]'
-        git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-        git add history.txt
-        git commit -m "Update post history to avoid duplicates" || echo "No changes to commit"
-        git push
+on:
+  schedule:
+    - cron: '30 6 * * *'
+  workflow_dispatch:
+
+jobs:
+  run-bot:
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: write 
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install Dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run Bot Script
+        run: python Bot.py
+
+      - name: Save History File to Repository
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add history.txt
+          git commit -m "Update post history to avoid duplicates" || echo "No changes to commit"
+          git push
