@@ -39,7 +39,7 @@ def generate_post_content():
     
     خروجی باید دقیقاً با این فرمت سه بخشی باشد (بدون کلمات اضافه):
     متن: [یک کپشن جذاب و تخصصی، با پاراگراف‌های کوتاه، همراه با ایموجی. بدون تگ HTML و ستاره. بین ۷۰ تا ۱۰۰ کلمه]
-    موضوع_تصویر: [یک عبارت کوتاه انگلیسی برای جستجوی عکس مرتبط]
+    موضوع_تصویر: [دقیقاً ۱ تا ۳ کلمه انگلیسی که «ملموس‌ترین شیء فیزیکی» یا «مکان» مرتبط با متن را توصیف کند. به هیچ وجه مفاهیم انتزاعی (مثل marketing, business, strategy, black friday) ننویس! مثلاً اگر متن درباره ترفند قیمت‌گذاری پاپ‌کورن است، فقط بنویس: popcorn cinema]
     موضوع_تاریخچه: [یک عبارت فارسی ۳ تا ۴ کلمه‌ای که مشخص کند امروز درباره چه تکنیک جزئی‌ای حرف زدی]
     """
     
@@ -58,6 +58,7 @@ def generate_post_content():
 
 def get_pexels_image(image_topic):
     headers = {"Authorization": PEXELS_API_KEY}
+    # جستجو بر اساس اشیای فیزیکی و ملموس
     search_url = f"https://api.pexels.com/v1/search?query={image_topic}&per_page=15"
     try:
         response = requests.get(search_url, headers=headers).json()
